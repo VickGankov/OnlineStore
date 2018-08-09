@@ -1,0 +1,36 @@
+﻿@using System.Data.SqlClient;
+@using System.Configuration;
+
+@{
+    Layout = "~/Shared/_Layout.cshtml";
+
+    Validation.RequireField("name", "* Admin Name not valid");
+    Validation.RequireField("password", "* Password not valid");
+
+    var adminName = "vasko";
+    var adminPassword = "1234";
+
+    if(IsPost && Validation.IsValid())
+    {
+        if(Request["name"] == adminName && Request["password"]==adminPassword)
+        {
+            Response.Redirect(Href("~/Products"));
+        }
+
+    }
+
+}       
+
+<div id="logIn">
+
+    <form action="" method="post" id="adminSignIn">
+        <h4>Admin Log In</h4>
+        Name <br /><input type="text" name="name" /><br />
+        <span id="error">@Html.ValidationMessage("name")</span><br />
+
+        Password <br /><input type="password" name="password" />  <br />
+        <span id="error">@Html.ValidationMessage("password")</span><br />
+        <input type="submit" name="login" value="Log In" />
+
+    </form>
+</div>

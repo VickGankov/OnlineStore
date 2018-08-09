@@ -1,0 +1,37 @@
+﻿@{
+    Page.Title = "BG All Day";
+    Layout = "~/Shared/_Layout.cshtml";
+
+
+    if (IsPost && Validation.IsValid())
+    {
+        HttpCookie cookie = Request.Cookies["signUp"];
+
+
+        var fname = Request.Form["fname"];
+        var email = Request.Form["email"];
+        if (cookie != null)
+        {
+            fname = "Thank you " + cookie["fname"];
+            email = "Email is " + cookie["email"];
+        }
+
+
+    }
+}
+<div class="container">
+    
+            
+                <h1>BG design Clothing</h1>
+                <hr><div style="float:left;" id="welcome">
+                    <a id="signUp" class="fa fa-fighter-jet"
+                       href="~/SignUp.cshtml">Get Started with the Deals</a>
+                    <p>
+
+                        <div id="container">                      
+                                <img id="background"
+                                src="~/Image/hoodie.jpg" />
+                        </div>
+                    </p>
+                </div>
+            </div>  

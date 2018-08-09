@@ -1,0 +1,98 @@
+﻿@using System.Data.SqlClient;
+@using System.Configuration;
+
+@{
+    Layout = "~/Shared/_Layout.cshtml";
+    Page.Title = "Delete a Product";
+
+    var design = "";
+    var size = "";
+    var price = "";
+    var productId = "";
+
+
+    if (!IsPost)
+    {
+        if (!Request.QueryString["Id"].IsEmpty() && Request.QueryString["Id"].IsInt())
+        {
+            productId = Request.QueryString["Id"];
+            string cstr = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+            using (SqlConnection con = new SqlConnection(cstr))
+            {
+                con.Open();
+                string query = string.Format("SELECT * FROM Products WHERE Id = '{0}'", productId);
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    SqlDataReader result = cmd.ExecuteReader();
+
+
+                    if (result.HasRows)
+                    {
+                        result.Read();
+                        design = result["Design"].ToString();
+                        size = result["Size"].ToString();
+                        price = result["Price"].ToString();
+                    }
+                    else
+                    {
+                        Validation.AddFormError("No product was found for that ID.");
+                    }
+                }
+            }
+        }
+        else
+        {
+            Validation.AddFormError("No product was found for that ID.");
+        }
+    }
+
+    if (IsPost && !Request["buttonDelete"].IsEmpty())
+    {
+
+        productId = Request.Form["productId"];
+
+        string cstr = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+        using (SqlConnection con = new SqlConnection(cstr))
+        {
+            con.Open();
+            string query = string.Format("DELETE FROM Products WHERE Id='{0}'", productId);
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                var result = cmd.ExecuteScalar();
+            }
+        }
+
+        Response.Redirect("~/Products");
+    }
+
+}
+
+
+<h2>Delete a Movie</h2>
+@Html.ValidationSummary()
+
+
+<form method="post" id="edit">
+    <fieldset>
+        <legend>Movie Information</legend>
+
+        <p>
+            <span>Design:</span>
+            <span>@design</span>
+        </p>
+
+        <p>
+            <span>Size:</span>
+            <span>@size</span>
+        </p>
+
+        <p>
+            <span>Price:</span>
+            <span>@price</span>
+        </p>
+
+        <input type="hidden" name="productid" value="@productId" />
+        <p><input type="submit" name="buttonDelete" value="Delete Product" /></p>
+    </fieldset>
+    <p><a href="~/Products.cshtml">Return to product listing</a></p>
+</form>

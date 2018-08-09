@@ -1,0 +1,67 @@
+﻿@using System.Data.SqlClient;
+@using System.Configuration;
+
+@{
+    Layout = "~/Shared/_layout.cshtml";
+    Page.Title = "My Products List";
+
+    List<Product> selectedData = new List<Product>();
+    string cstr = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+
+    using (SqlConnection con = new SqlConnection(cstr))
+    {
+        con.Open();
+
+        // define the query
+        string query = "SELECT * FROM Products";
+        string searchTerm = String.Empty;
+        if (!Request.QueryString["searchProduct"].IsEmpty())
+        {
+            searchTerm = "%" + Request.QueryString["searchProduct"] + "%";
+            query = String.Format("SELECT * FROM Products WHERE Design LIKE '{0}'", searchTerm);
+        }
+
+        using (SqlCommand cmd = new SqlCommand(query, con))
+        {
+            using (SqlDataReader rdr = cmd.ExecuteReader())
+            {
+                while (rdr.Read())
+                {
+                    selectedData.Add(new Product
+                    {
+                            Id = Convert.ToInt32(rdr["Id"]),
+                            Design = rdr["Design"].ToString(),
+                            Size = rdr["Size"].ToString(),
+                            Price= rdr["Price"].ToString()                         
+                    });
+                }
+            }
+        }
+    }
+    var grid = new WebGrid(source: selectedData, defaultSort: "Design", rowsPerPage: 5);
+}
+
+<h2>List Products</h2>
+<form method="get">
+    <div>
+        <label for="searchproduct">Product to look for:</label>
+        <input type="text" name="searchProduct"
+               value="@Request.QueryString["searchProduct"]" />
+        <input type="Submit" value="Search Product" /><br />
+    </div>
+</form>
+
+<div id="products">
+    @grid.GetHtml(
+        tableStyle: "grid",
+        headerStyle: "head",
+        alternatingRowStyle: "alt",
+        columns: grid.Columns(
+            grid.Column(format: @<a href="~/EditProduct?id=@item.Id"> Edit </a>),
+            grid.Column("Design"),
+            grid.Column("Size"),
+            grid.Column("Price"),
+            grid.Column(format: @<a href="~/DeleteInventory?id=@item.Id"> Delete </a>)
+       )
+    )<hr /><p><a href=@Href("~/AddProduct")>Add a new product</a></p>
+</div>

@@ -1,0 +1,51 @@
+﻿@using System.Data.SqlClient;
+@using System.Configuration;
+@{
+    Layout = "~/Shared/_layout.cshtml";
+    Page.Title = "My Products List";
+
+    string user = "";
+
+
+    Session["userId"] = Request.Form["name"];
+
+    if (Request.Cookies["cookie"] != null)
+    {
+        HttpCookie newid = Request.Cookies["cookie"];
+        user = newid.Value;
+        //Response.Cookies["cookie"].Value = Request.Form["cookie"];    
+    }
+    var name = "";
+    string cstr = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+    using (SqlConnection con = new SqlConnection(cstr))
+    {
+        con.Open();
+        string query = string.Format("Select Design From Products Where Id=7");
+
+        using (SqlCommand cmd = new SqlCommand(query, con))
+        {
+            name = cmd.ExecuteScalar().ToString();
+            Session["Product"] = "Product " + name;
+        }
+        
+    }
+
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+</head>
+<body id="welcome">
+    <h3>Welcome  @user</h3>
+   
+    <h2>Out Sale Today!</h2>
+    <div style="display:flex; justify-content:space-around;" id="buy">
+        <div><img src="~/Image/lion.jpg" id="img" /> <a href="~/Cart.cshtml" name="img" /></div>
+        <div><img src="~/Image/hoodie.jpg" id="img" /><a href="~/Cart.cshtml" name="img" /></div>
+        <div><img src="~/Image/hoodie1.jpg" id="img" /><a href="~/Cart.cshtml" name="img" /></div>
+        <div><img src="~/Image/hoodie2.jpg" id="img" /><a href="~/Cart.cshtml" name="img" /></div>
+        <div><img src="~/Image/hoodie3.jpg" id="img" /><a href="~/Cart.cshtml" name="img" /></div>
+    </div>
+</body>
+</html>

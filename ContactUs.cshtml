@@ -1,0 +1,46 @@
+﻿@using System.Data.SqlClient;
+@using System.Configuration;
+@{
+    Page.Title = "Contact Us";
+    Layout = "~/Shared/_Layout.cshtml";
+
+    var name = "";
+    var email = "";
+    var message = "";
+
+        Validation.RequireField("name", " You must enter your name");
+        Validation.RequireField("email", " Email not valid");
+        Validation.RequireField("message", " You need to write a message!");
+
+        if (IsPost && Validation.IsValid())
+        {
+
+            name = Request.Form["name"];
+            email = Request.Form["email"];
+            message = Request.Form["message"];
+
+            string cstr = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+            using (SqlConnection con = new SqlConnection(cstr))
+            {
+                con.Open();
+                string query = string.Format("INSERT INTO Contacts (Name, Email, Message) Values('{0}', '{1}', '{2}')", name, email,message);
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    var result = cmd.ExecuteScalar();
+                }
+            }
+
+            Response.Redirect("~/Welcome");
+        }  
+
+}
+<header>CONTACT US</header>
+@Html.ValidationSummary()
+<form id="form" class="topBefore" method="post">
+
+    <input id="name" name="name"type="text" placeholder="NAME" value="@name">
+    <input id="email" type="text" placeholder="E-MAIL" value=@email>
+    <textarea id="message" type="text" placeholder="MESSAGE"></textarea>
+    <input id="submit" type="submit" value="GO!">
+
+</form>

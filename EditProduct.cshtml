@@ -1,0 +1,106 @@
+﻿@using System.Data.SqlClient;
+@using System.Configuration;
+
+@{
+
+    Layout = "~/Shared/_Layout.cshtml";
+    Page.Title = "Edit a Product";
+    var design = "";
+    var size = "";
+    var price = "";
+    var productId = "";
+
+
+    if (!IsPost)
+    {
+        if (!Request.QueryString["Id"].IsEmpty() && Request.QueryString["Id"].IsInt())
+        {
+            productId = Request.QueryString["Id"];
+            string cstr = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+            using (SqlConnection con = new SqlConnection(cstr))
+            {
+                con.Open();
+                string query = string.Format("SELECT * FROM Products WHERE Id = '{0}'", productId);
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    SqlDataReader result = cmd.ExecuteReader();
+
+
+                    if (result.HasRows)
+                    {
+                        result.Read();
+                        design = result["Design"].ToString();
+                        size = result["Size"].ToString();
+                        price = result["Price"].ToString();
+                    }
+                    else
+                    {
+                        Validation.AddFormError("No product was selected.");
+                    }
+                }
+            }
+        }
+        else
+        {
+            Validation.AddFormError("No product was selected.");
+        }
+    }
+
+    if (IsPost)
+    {
+        Validation.RequireField("design", "You must enter a design");
+        Validation.RequireField("size", "Size is reqired");
+        Validation.RequireField("price", "You haven't entered a price");
+        Validation.RequireField("productid", "No product ID was submitted!");
+
+        design = Request.Form["design"];
+        size = Request.Form["size"];
+        price = Request.Form["price"];
+        productId = Request.Form["productId"];
+
+        if (Validation.IsValid())
+        {
+            string cstr = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+            using (SqlConnection con = new SqlConnection(cstr))
+            {
+                con.Open();
+                string query = string.Format("UPDATE Products SET Design='{0}', Size='{1}', Price='{2}' WHERE Id='{3}'", design, size, price, productId);
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    var result = cmd.ExecuteScalar();
+                }
+            }
+
+            Response.Redirect("~/Products");
+        }
+    }
+}
+
+
+<h2>Edit a Product</h2>
+@Html.ValidationSummary()
+<form method="post">
+    <fieldset>
+        <legend>Product Information</legend>
+
+        <p>
+            <label for="design">Design:</label>
+            <input type="text" name="design" value="@design" />
+        </p>
+
+        <p>
+            <label for="size">Size:</label>
+            <input type="text" name="size" value="@size" />
+        </p>
+
+        <p>
+            <label for="price">Price:</label>
+            <input type="text" name="price" value="@price" />
+        </p>
+
+        <input type="hidden" name="productid" value="@productId" />
+
+        <p><input type="submit" name="buttonSubmit" value="Submit Changes" /></p>
+    </fieldset>
+</form>
+<p><a href="~/Products">Return to Product listing</a></p>

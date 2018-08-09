@@ -1,0 +1,114 @@
+﻿@using System.Data.SqlClient;
+@using System.Configuration;
+
+@{ 
+    Page.Title = "Sign Up";
+    Layout = "~/Shared/_Layout.cshtml";
+
+    Validation.RequireField("name", "You must enter your name");
+    Validation.RequireField("email", "You need to enter an email");
+ 
+    Session.Abandon();
+
+    HttpCookie cookie;
+    var Name = Request["Name"];
+    var Email = Request["Email"];
+
+
+    if (IsPost && Validation.IsValid())
+    {
+
+        if (Response.Cookies["cookie"] != null)
+        {
+
+            //add cookie
+            cookie = new HttpCookie("cookie");
+            cookie.Value = Request.Form["name"];
+            //cookie.Value = Request.Form["email"];
+            Response.SetCookie(cookie);
+        }
+        else
+        {
+            cookie = new HttpCookie("cookie");
+            cookie.Value = Request.Form["name"];
+            //cookie.Value = Request.Form["email"];
+            Response.Cookies.Add(cookie);
+        }
+
+        if (ModelState.IsValid)
+        {
+            string conStr = ConfigurationManager.ConnectionStrings["MyDBConn"].ConnectionString;
+            using (SqlConnection con = new SqlConnection(conStr))
+            {
+                con.Open();
+                Customer c = new Customer
+                {
+                    Name = Name,
+                    Email = Email
+                };
+                int id = new CustomerManager().InsertCustomer(c, con);
+            }
+            //Display the page that list the customer info
+            Response.Redirect(Href("~/Welcome"));
+        }
+    }
+}
+
+<form id="form" method="post" name="myForm" >
+   
+    <h3>
+        Sign Up for Crazy Good Deals!
+    </h3>
+    <hr>
+ 
+    <div id="signUp">
+        <label for="fname">First Name: </label><br />
+        <input id="signUp" name="name" type="text"value="@Name"  /><br />
+        <span id="error">@Html.ValidationMessage("name")</span>
+        <br>
+        <label for="email">Email: </label><br />
+        <input id="signUp" name="email" type="email" value="@Email"><br />
+        <span id="error">@Html.ValidationMessage("email")</span>
+        <br>
+        <input id="validate" name="submit" type="submit" value="Register">
+       <h2 id="result"></h2>
+    </div>
+</form>
+
+<script>
+
+    @*function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }*@
+    function validate() {
+        var $result = $("#result");
+        var email = $("#email").val();
+        $result.text("");
+
+        if (validateEmail(email)) {
+            $result.text(email + " is valid :)");
+            $result.css("color", "green");
+        } else {
+            $result.text(email + " is not valid :(");
+            $result.css("color", "red");
+        }
+        return false;
+    }
+
+    $("#validate").bind("click", validate);
+
+            var body=document.querySelector("hr");
+				        	var isComplete=false;
+				        function blink(){
+				        if(isComplete){
+				        	body.style.background="red";
+				        }else {
+				        	body.style.background="#FFB27FFF";
+				        }
+				        isComplete=!isComplete;
+
+				        }
+				        setInterval(blink,500);
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
